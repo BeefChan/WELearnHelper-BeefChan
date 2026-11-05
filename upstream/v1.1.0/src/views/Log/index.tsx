@@ -239,7 +239,7 @@ export function LogPanel() {
                                 color: "#536779",
                             }}
                         >
-                            {`BeefChan · ${metadata.projects.welearn.displayVersion} 非官方修复版`}
+                            {`BeefChan · ${metadata.projects.welearn.version} 非官方修复版`}
                         </span>
                     </div>
 

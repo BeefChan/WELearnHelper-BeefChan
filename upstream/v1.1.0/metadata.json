@@ -6,9 +6,9 @@
             "title": "随行课堂网课助手",
             "name": "WELearn网课助手",
             "version": "1.3.4",
-            "displayVersion": "1.34",
+            "displayVersion": "1.3.4",
             "upstreamVersion": "1.1.0",
-            "upstreamDisplayVersion": "1.10",
+            "upstreamDisplayVersion": "1.1.0",
             "upstreamAuthor": "SSmJaE",
             "maintainer": "BeefChan",
             "aiContributors": [
@@ -24,7 +24,7 @@
                 "*://centercourseware.sflep.com/*"
             ],
             "namespace": "https://github.com/SSmJaE/WELearnHelper",
-            "description": "【BeefChan 非官方修复版 1.34】显示WE Learn随行课堂题目答案；自动答题；刷时长；全自动刷题（按媒体时长+随机等待→自动提交→自动下一节）；可按单元/节勾选跳过",
+            "description": "【BeefChan 非官方修复版 1.3.4】显示WE Learn随行课堂题目答案；自动答题；刷时长；全自动刷题（按媒体时长+随机等待→自动提交→自动下一节）；可按单元/节勾选跳过",
             "connect": [
                 "localhost",
                 "47.100.166.53"

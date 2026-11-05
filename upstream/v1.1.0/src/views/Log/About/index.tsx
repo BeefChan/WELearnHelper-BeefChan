@@ -36,7 +36,7 @@ export const About = memo(function () {
             </h3>
 
             <div style={textStyle}>
-                {`当前版本：${project.displayVersion}（扩展版本号 ${project.version}）`}
+                {`当前版本：${project.version}`}
             </div>
 
             <div style={textStyle}>
@@ -49,11 +49,11 @@ export const About = memo(function () {
                 >
                     {project.upstreamAuthor}
                 </a>
-                {` · 原版维护基线 ${project.upstreamDisplayVersion}（${project.upstreamVersion}）`}
+                {` · 原版维护基线 ${project.upstreamVersion}`}
             </div>
 
             <div style={{ ...textStyle, fontWeight: 600 }}>
-                {`后续修改维护：${project.maintainer} · 从 ${project.upstreamDisplayVersion} 修改至 ${project.displayVersion}`}
+                {`后续修改维护：${project.maintainer} · 从 ${project.upstreamVersion} 修改至 ${project.version}`}
             </div>
 
             <div style={textStyle}>{`AI 协作：${project.aiContributors.join(" / ")}`}</div>
@@ -61,6 +61,10 @@ export const About = memo(function () {
             <div style={{ ...textStyle, fontSize: 12, color: "#536779" }}>
                 本分支以原作者 1.1.0
                 为基础继续修改；不代表上游停更，也不代表原作者或平台官方。保留原作者署名及 GPL v3 许可证。
+            </div>
+
+            <div style={{ ...textStyle, fontSize: 12, color: "#b84949" }}>
+                本版本未经过大规模充分测试，覆盖的教材、题型和页面结构有限，可能存在未适配或回归问题；请先在少量章节验证。
             </div>
 
             <div style={{ borderTop: "1px solid #d9dfe7", marginTop: 12, paddingTop: 10 }}>
