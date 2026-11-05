@@ -75,3 +75,14 @@
 - 新增 `scripts/package-extension.mjs` 与 `npm run package`，替换依赖 python 的发布脚本
 - 验证：全量 `tsc --noEmit` 通过；`npm run build:crx` 成功（index.js 891 KB）；Edge `--pack-extension` 生成 CRX 成功（清单合法）
 - 根目录 `src/` 转为归档产物，不再修改
+
+## 1.34（1.3.4）— 2026-11-06
+
+首个**由 TypeScript 源码构建**的正式版本，功能集合与 1.3.3 一致，实现位置从「改构建产物」迁移到源码工程。
+
+- 刷题范围、自动等待 / 提交 / 下一节、题型适配、新版界面全部合并进 `upstream/v1.1.0/src/`
+- 整合修正：设置加载完成前不解析、同页不重复处理、等待作答完成后再进入提交流程
+- 新增 `npm run package` 一键生成清单与安装包，替换依赖 python 的发布脚本
+- 验证：全量 `tsc --noEmit` 通过；`npm run build:crx` 成功；Edge `--pack-extension` 生成 CRX 成功
+- 真实课程实测（BeefChan）：关于页版本、刷题范围勾选与跳过、自动答题各题型、全自动等待→提交→下一节、设置面板键盘切换、控制台无报错，6 项均通过
+- 安装包：`WELearnHelper-1.3.4-BeefChan.zip`
