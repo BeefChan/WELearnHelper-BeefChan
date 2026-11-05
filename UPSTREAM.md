@@ -30,6 +30,19 @@
 
 修复说明不意味着原作者审核或认可这些修改。本分支的缺陷及反馈应由本分支维护者处理。
 
+## 同步上游改动
+
+本仓库不包含上游 Git 历史。需要合并原作者更新时，在本地添加只读远端：
+
+```powershell
+git remote add upstream https://github.com/SSmJaE/WELearnHelper.git
+git fetch upstream --tags
+git log --oneline upstream/master -5      # 查看上游近期提交
+git diff HEAD upstream/master --stat       # 对比与本分支的差异
+```
+
+上游 `v1.1.0` 源码可用 `git archive v1.1.0 | tar -x -C upstream-v1.1.0` 导出参考。改动合并需人工比对，因为本分支维护的是打包后的脚本，与上游 TypeScript 工程结构不同。
+
 ## 许可证及源代码
 
 根目录 [LICENSE](LICENSE) 为上游 v1.1.0 对应提交中的 GPL v3 原文，未更改其内容。保持上游和内嵌依赖的版权、许可证注释，不删除或改成自己的署名。
