@@ -1,3 +1,10 @@
+## 源码与许可证完善 — 2026-11-05
+
+- 将上游 v1.1.0 完整工程（TypeScript 源码、`pnpm-lock.yaml`、Vite 构建脚本、静态资源）以只读方式纳入 `upstream/v1.1.0/`，与上游标签逐字节一致。
+- 新增 `PATCHES.md`：列出本分支相对上游的修改项、涉及的模块，以及移植回 TypeScript 源码时的对应位置。
+- 实测该上游工程可重建：`npm install`（192 个包）后 `npm run build:crx` 成功产出 `index.js`、`inject.js`、`content.js`、`background.js`。
+- `README.md` 与 `UPSTREAM.md` 更新源码说明；`.gitignore` 放行仓库内上游源码，排除构建产物、依赖目录与 npm 锁文件。
+
 ## 发布整理 — 2026-11-05
 
 - 扩展 `homepage_url` 与脚本内主页地址改为本分支仓库，原作者链接保留在关于页和来源文档。

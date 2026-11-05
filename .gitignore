@@ -23,6 +23,11 @@
 !/docs/
 /docs/*
 !/docs/INSTALL.md
+!/PATCHES.md
+!/upstream/
+/upstream/*
+!/upstream/v1.1.0/
+!/upstream/v1.1.0/**
 
 # Never publish secrets, local browser profiles, or generated artifacts.
 .env
@@ -40,3 +45,9 @@
 **/recon/
 **/backup/
 **/dist/
+
+# Upstream build flag is a non-secret compile switch; keep it for reproducible builds.
+!/upstream/v1.1.0/.env
+
+# npm-generated lockfile for the vendored upstream project (upstream uses pnpm).
+/upstream/v1.1.0/package-lock.json

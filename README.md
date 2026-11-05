@@ -195,9 +195,12 @@ node tools/cdp.mjs close
 - 基础提交：`3dddb2af63e8004bf60416df3a62b72095206f5d`。
 - 修改基础：提供的 `WELearnHelper1.1.0.crx` 解包目录。
 - 保留上游 **GNU GPL v3** 许可证，见 [LICENSE](LICENSE)。
+- 本版本源码：[`src/`](src)（实际安装使用的扩展脚本，可直接修改）
+- 上游完整工程：[`upstream/v1.1.0/`](upstream/v1.1.0)（未修改的 TypeScript 源码、锁文件与构建脚本，可用于重建 1.1.0 基线）
+- 修改清单：[PATCHES.md](PATCHES.md)（本分支改动项与上游对应位置，供移植回源码使用）
 - 来源与修改归属见 [UPSTREAM.md](UPSTREAM.md)，版本记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-本仓库提供本版本对应的可修改源码（即 `src/` 下的扩展脚本）。上游完整的 TypeScript 工程与构建脚本可在上游标签 v1.1.0 获取；本分支尚未把修改迁回该工程，正式分发时请同时注明这一差异。
+本分支直接修改构建产物，因此 `src/` 就是本版本的可修改源码；`upstream/v1.1.0/` 与上游标签逐字节一致，可独立构建。两者的差异集中在 [PATCHES.md](PATCHES.md) 列出的修改项，尚未合并回 TypeScript 源码。
 
 ## 网络连接与数据
 
