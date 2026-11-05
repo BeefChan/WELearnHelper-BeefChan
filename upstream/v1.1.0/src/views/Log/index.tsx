@@ -1,6 +1,6 @@
 import "simplebar-react/dist/simplebar.min.css";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Rnd } from "react-rnd";
 import SimpleBar from "simplebar-react";
 
@@ -21,19 +21,7 @@ import { ErrorRecord } from "./records/Error";
 import { InfoRecord } from "./records/Info";
 import { QuestionRecord } from "./records/Question";
 
-function getAppTitle() {
-    const defaultTitle = "EOCS网课助手";
-
-    // console.log(process.env.COMPILE_PLATFORM)
-
-    if (process.env.COMPILE_PLATFORM) {
-        return metadata.projects[process.env.COMPILE_PLATFORM]?.title ?? defaultTitle;
-    }
-
-    return defaultTitle;
-}
-
-export function dispatchRecord(record: any) {
+function dispatchRecord(record: any) {
     let recordDisplay;
 
     switch (record.type) {
@@ -65,147 +53,85 @@ export function dispatchRecord(record: any) {
     return recordDisplay;
 }
 
-const buffer = [
-    {
-        type: "info",
-        timestamp: `${Math.random()}`,
-        content: "这是一条信息",
-    },
-    {
-        type: "unknown",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: {
-            message: "这是一条未知类型的记录",
-            id: "123",
-        },
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-    {
-        type: "error",
-        timestamp: `${Math.random()}`,
-        content: "这是一条未知类型的记录",
-    },
-];
+/** 运行状态胶囊：根据当前开启的自动功能显示模式 */
+const StatusPill = styled.span<{ $active: boolean }>`
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: ${(props) => (props.$active ? "#e7f7f0" : "#eef3f7")};
+    color: ${(props) => (props.$active ? "#146848" : "#43586c")};
 
-let status = false;
+    &::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+`;
 
-const RecordContainer = styled.div(
+/** 单条日志：白底卡片 + 左侧彩色竖条（错误红、题目青绿） */
+const RecordContainer = styled.div<{ $recordType?: string }>(
     {
-        border: "black 1px solid",
-        borderRadius: 4,
-        fontSize: 16,
-        padding: 4,
+        marginBottom: 8,
+        padding: "10px 12px",
+        background: "#fff",
+        border: "1px solid #e0e7ee",
+        borderLeft: "3px solid #c4d4e2",
+        borderRadius: 10,
+        fontSize: 13,
+        lineHeight: 1.7,
+        overflowWrap: "anywhere",
+        textAlign: "left",
+        transition: "border-color .15s",
     },
-    ({ theme }) => ({
-        "&:hover": {
-            background: theme.colors.secondary,
-        },
-    }),
+    ({ $recordType }) => {
+        const accent =
+            $recordType === "error" ? "#d95757" : $recordType === "question" ? "#087f8c" : "#c4d4e2";
+
+        return {
+            ...($recordType === "error"
+                ? { background: "#fffafa", borderLeftColor: accent }
+                : $recordType === "question"
+                ? { borderLeftColor: accent }
+                : {}),
+            "&:hover": {
+                borderColor: "#c6dbe3",
+                borderLeftColor: accent,
+            },
+        };
+    },
 );
 
 export function LogPanel() {
-    const {
-        visibility,
-        logs,
-        // position: { floating, log },
-    } = useStore();
+    const { visibility, logs, userSettings } = useStore();
 
-    const appTitle = useMemo(() => getAppTitle(), []);
+    // 新版「全自动刷题」开关由 projects/welearn/exercise/setting.ts 提供
+    const { autoNext, autoSolve, autoRefresh } = userSettings;
+
+    const modeLabel =
+        autoNext && autoSolve
+            ? "全自动已开启"
+            : autoRefresh && !autoNext
+            ? "定时挂机已开启"
+            : autoSolve
+            ? "自动答题已开启"
+            : "自动功能已关闭";
+
+    const modeActive = !!(autoSolve || autoRefresh);
 
     const [isDragging, setIsDragging] = useState(false);
 
     const theme = useTheme();
 
-    // useEffect(() => {
-    //     if (status) return;
-
-    //     for (const [index, record] of buffer.entries()) {
-    //         setTimeout(() => {
-    //             store.logs.push(record);
-    //         }, index * 200);
-    //     }
-
-    //     status = true;
-    // }, []);
-
-    // logger.debug({
-    //     floating,
-    // });
-
-    const [spring, api] = useSpring(
+    const [spring] = useSpring(
         () => ({
             opacity: visibility.log ? 1 : 0,
             scale: visibility.log ? 1 : 0,
-            // translate: visibility.log ? 0 : `${floating.y - log.y}px`,
-            // transform: visibility.log ? "translateX(200px)" : `translateX(${floating.x - log.x}px)`,
-
-            // x: visibility.log ? 100 : floating.x,
-            // y: visibility.log ? 100 : floating.y,
-
             config: {
                 ...config.wobbly,
             },
@@ -231,8 +157,8 @@ export function LogPanel() {
             default={{
                 x: 100,
                 y: 100,
-                width: 600,
-                height: 100,
+                width: 520,
+                height: 420,
             }}
             minWidth={350}
             maxWidth={600}
@@ -262,19 +188,20 @@ export function LogPanel() {
             }}
         >
             <animated.div
+                className="eocs-log-window"
                 style={{
-                    zIndex: 99,
+                    zIndex: 2147482000,
                     width: "100%",
-                    maxHeight: 600,
-
-                    background: "rgba(255, 255, 255, 0.95)",
-                    border: "black 2px solid",
-                    borderRadius: 10,
+                    maxHeight: "min(640px, calc(100vh - 32px))",
+                    background: "#fff",
+                    border: "1px solid #dce5ec",
+                    borderRadius: 16,
                     boxShadow:
-                        "0 11px 15px -7px rgba(0, 0, 0, 0.2),0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12)",
+                        "0 16px 52px rgba(32, 55, 75, 0.16), 0 2px 8px rgba(32, 55, 75, 0.05)",
                     display: display ? "flex" : "none",
                     flexDirection: "column",
-                    lineHeight: "24px !important",
+                    lineHeight: 1.6,
+                    overflow: "hidden",
                     ...spring,
                 }}
             >
@@ -284,11 +211,36 @@ export function LogPanel() {
                     isDragging={isDragging}
                 >
                     <div
+                        className="eocs-brand-heading"
                         style={{
-                            fontSize: 24,
+                            minWidth: 0,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2,
                         }}
                     >
-                        {appTitle}
+                        <span
+                            className="eocs-brand-title"
+                            style={{
+                                fontSize: 16,
+                                fontWeight: 700,
+                                letterSpacing: ".15px",
+                                color: "#182c3c",
+                            }}
+                        >
+                            WELearn 学习助手
+                        </span>
+
+                        <span
+                            className="eocs-brand-subtitle"
+                            style={{
+                                fontSize: 11,
+                                fontWeight: 400,
+                                color: "#536779",
+                            }}
+                        >
+                            {`BeefChan · ${metadata.projects.welearn.displayVersion} 非官方修复版`}
+                        </span>
                     </div>
 
                     <div
@@ -297,7 +249,8 @@ export function LogPanel() {
                             display: "flex",
                             flexDirection: "row",
                             alignItems: "center",
-                            justifyContent: "center",
+                            gap: 6,
+                            flexShrink: 0,
                         }}
                     >
                         <PopOver
@@ -305,14 +258,13 @@ export function LogPanel() {
                             content={<About />}
                             openDelay
                             delay
-                            backgroundColor="rgba(255, 255, 255, 0.95)"
                             placement="right"
                             border
                         >
-                            <MenuButton>
+                            <MenuButton aria-label="关于与使用引导">
                                 <Info
                                     theme="filled"
-                                    size="28"
+                                    size="22"
                                     fill={theme.colors.active}
                                     strokeWidth={5}
                                 />
@@ -324,19 +276,15 @@ export function LogPanel() {
                             content={`${visibility.config ? "关闭" : "打开"}设置面板`}
                         >
                             <MenuButton
+                                aria-label={visibility.config ? "关闭设置" : "打开设置"}
                                 onClick={() => {
                                     store.setVisibility("config", !visibility.config);
                                 }}
-                                style={{
-                                    lineHeight: "normal",
-                                    marginLeft: 4,
-                                }}
                             >
-                                {/* ⚙️ */}
                                 <SettingTwo
                                     theme="multi-color"
-                                    size="28"
-                                    fill={["#333", "#E6E6E6", "#000000", "#ffffff"]}
+                                    size="22"
+                                    fill={["#35546a", "#dce5ec", "#087f8c", "#ffffff"]}
                                     strokeWidth={3}
                                 />
                             </MenuButton>
@@ -344,22 +292,13 @@ export function LogPanel() {
 
                         <PopOver key="minimize" content="最小化当前窗口">
                             <MenuButton
+                                aria-label="最小化窗口"
                                 onClick={() => {
                                     store.setVisibility("log", false);
                                     store.setVisibility("floating", true);
                                 }}
-                                style={{
-                                    lineHeight: "normal",
-                                    marginLeft: 4,
-                                }}
                             >
-                                {/* ❌ */}
-                                <Close
-                                    theme="filled"
-                                    size="28"
-                                    fill={theme.colors.error}
-                                    strokeWidth={7}
-                                />
+                                <Close theme="filled" size="20" fill="#b84949" strokeWidth={7} />
                             </MenuButton>
                         </PopOver>
                     </div>
@@ -368,12 +307,12 @@ export function LogPanel() {
                 <SimpleBar
                     id="log-panel-log-container"
                     style={{
-                        borderTop: "black 2px solid",
-                        padding: "4px 8px",
+                        background: "#f4f7fa",
+                        padding: 12,
                         flexGrow: 1,
-                        maxHeight: 500,
+                        minHeight: 120,
+                        maxHeight: "min(450px, calc(100vh - 200px))",
                     }}
-                    // scrollbarMinSize={8} 这个没用
                 >
                     <Global
                         styles={{
@@ -383,31 +322,78 @@ export function LogPanel() {
                         }}
                     />
 
-                    {logs.map((record, index) => {
-                        return (
-                            // hasExtra => !disabled，避免页面上的PopOver过多，略微优化一下性能
-                            <PopOver
-                                key={record.timestamp}
-                                content={record.extra}
-                                placement={"right"}
-                                disabled={record.extra === undefined}
-                                delay={record.type === "error"}
+                    <div
+                        className="eocs-status-bar"
+                        style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "10px 16px",
+                            background: "#fbfcfd",
+                            borderBottom: "1px solid #dce5ec",
+                            flexShrink: 0,
+                        }}
+                    >
+                        <StatusPill className="eocs-status-pill" $active={modeActive} data-active={modeActive}>
+                            {modeLabel}
+                        </StatusPill>
+
+                        <span style={{ fontSize: 12, color: "#607589" }}>
+                            {`${logs.length} 条记录`}
+                        </span>
+                    </div>
+
+                    {logs.length === 0 ? (
+                        <div
+                            className="eocs-empty-state"
+                            style={{
+                                padding: "26px 18px",
+                                textAlign: "center",
+                                fontSize: 13,
+                                color: "#536779",
+                            }}
+                        >
+                            <strong
+                                style={{
+                                    display: "block",
+                                    marginBottom: 6,
+                                    fontSize: 16,
+                                    color: "#182c3c",
+                                }}
                             >
-                                <RecordContainer
+                                暂无记录
+                            </strong>
+                            <span>
+                                在「设置」中开启自动答题或定时挂机后，运行记录会显示在这里。
+                            </span>
+                        </div>
+                    ) : (
+                        logs.map((record) => {
+                            return (
+                                // hasExtra => !disabled，避免页面上的PopOver过多，略微优化一下性能
+                                <PopOver
                                     key={record.timestamp}
-                                    style={{
-                                        marginTop: index === 0 ? 0 : 4,
-                                        fontFamily: 'Georgia, "Times New Roman", Times, serif',
-                                        textAlign: "start",
-                                        // font-family: 华文新魏 !important;
-                                        lineHeight: "normal !important", // 某些页面，会修改lineHeight，所以手动重置回来
-                                    }}
+                                    content={record.extra}
+                                    placement={"right"}
+                                    disabled={record.extra === undefined}
+                                    delay={record.type === "error"}
                                 >
-                                    {dispatchRecord(record)}
-                                </RecordContainer>
-                            </PopOver>
-                        );
-                    })}
+                                    <RecordContainer
+                                        className="eocs-log-record"
+                                        data-type={record.type}
+                                        $recordType={record.type}
+                                        style={{
+                                            // 某些页面会修改lineHeight，所以手动重置回来
+                                            lineHeight: 1.7,
+                                        }}
+                                    >
+                                        {dispatchRecord(record)}
+                                    </RecordContainer>
+                                </PopOver>
+                            );
+                        })
+                    )}
                 </SimpleBar>
             </animated.div>
         </Rnd>

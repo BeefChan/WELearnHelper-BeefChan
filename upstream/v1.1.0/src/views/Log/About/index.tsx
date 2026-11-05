@@ -1,110 +1,94 @@
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 
 import metadata from "@/metadata.json";
-import logger from "@/src/utils/logger";
-import { getValue } from "@/src/utils/polyfill";
 import { useTheme } from "@emotion/react";
-import styled from "@emotion/styled";
-import GithubOne from "@icon-park/react/es/icons/GithubOne";
+import type { CSSProperties } from "react";
 
-import Button from "../../components/Button";
-import { InfoRecordContainer } from "../records/Info";
-
-const ScaleIt = styled.div({
-    "&:hover": {
-        transform: "scale(1.2)",
-        transition: "transform 500ms",
-        cursor: "pointer",
-    },
-});
+const textStyle: CSSProperties = {
+    margin: "6px 0",
+    lineHeight: 1.7,
+    overflowWrap: "anywhere",
+};
 
 export const About = memo(function () {
     const theme = useTheme();
 
-    const [versionInfo, setVersionInfo] = useState<string[]>([]);
-
-    useEffect(() => {
-        getValue<string[]>("VERSION_INFO", []).then((messages) => {
-            setVersionInfo(messages);
-
-            logger.debug("成功设置about页面的版本信息");
-        });
-    }, []);
+    const project = metadata.projects.welearn;
 
     return (
         <div
             style={{
-                // border: "2px solid black",
                 width: 380,
-                color: "black",
-                // height: 300,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
+                maxWidth: "100%",
+                boxSizing: "border-box",
+                padding: 16,
+                color: "#182c3c",
+                textAlign: "left",
             }}
         >
-            <div
+            <h3
                 style={{
-                    display: "flex",
-                    justifyContent: "space-around",
-                    alignItems: "center",
-                    width: "100%",
-                    margin: "8px 0px",
+                    margin: "0 0 8px",
+                    color: theme.colors.active,
                 }}
             >
-                <ScaleIt>
-                    <GithubOne theme="filled" size="24" fill={theme.colors.active} />
-                </ScaleIt>
+                {`WELearnHelper ${project.displayVersion} · 非官方修复版`}
+            </h3>
 
-                <Button disabled>使用引导</Button>
+            <div style={textStyle}>
+                {`当前版本：${project.displayVersion}（扩展版本号 ${project.version}）`}
             </div>
 
-            <div>
-                版本 <span style={{ marginLeft: 24 }}>{metadata.projects.welearn.version}</span>
-            </div>
-
-            <div
-                style={{
-                    margin: "8px 0px",
-                }}
-            >
-                Made with ❤️ by
-                <ScaleIt
-                    style={{
-                        display: "inline-block",
-                        color: theme.colors.active,
-                        fontSize: 20,
-                        marginLeft: 8,
-                    }}
-                    onClick={() => {
-                        window.open("https://github.com/SSmJaE", "_blank");
-                    }}
+            <div style={textStyle}>
+                原作者：
+                <a
+                    href={project.namespace}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: theme.colors.active }}
                 >
-                    SSmJaE
-                </ScaleIt>
+                    {project.upstreamAuthor}
+                </a>
+                {` · 原版维护基线 ${project.upstreamDisplayVersion}（${project.upstreamVersion}）`}
             </div>
 
-            <div
-                style={{
-                    width: "100%",
-                    borderTop: "2px solid black",
-                    marginTop: 8,
-                }}
-            >
-                {versionInfo.length !== 0 &&
-                    versionInfo.map((message) => (
-                        <InfoRecordContainer
-                            style={{
-                                display: "block",
-                                marginBottom: 4,
-                            }}
-                            dangerouslySetInnerHTML={{
-                                __html: `${message}`,
-                            }}
-                        />
-                    ))}
+            <div style={{ ...textStyle, fontWeight: 600 }}>
+                {`后续修改维护：${project.maintainer} · 从 ${project.upstreamDisplayVersion} 修改至 ${project.displayVersion}`}
             </div>
+
+            <div style={textStyle}>{`AI 协作：${project.aiContributors.join(" / ")}`}</div>
+
+            <div style={{ ...textStyle, fontSize: 12, color: "#536779" }}>
+                本分支以原作者 1.1.0
+                为基础继续修改；不代表上游停更，也不代表原作者或平台官方。保留原作者署名及 GPL v3 许可证。
+            </div>
+
+            <div style={{ borderTop: "1px solid #d9dfe7", marginTop: 12, paddingTop: 10 }}>
+                <strong>本版修复与新增</strong>
+                <p style={textStyle}>
+                    修复刷时长 / 自动挂机相关失效问题，重新适配填空、选词、多空格、选择、判断、下拉及连线等题型处理，并修复设置同步、章节识别和重复切换等问题。
+                </p>
+                <p style={textStyle}>
+                    新增分层刷题范围、媒体时长与随机等待、自动提交和自动下一节组合流程。并非所有教材和题型均支持。
+                </p>
+            </div>
+
+            <details style={{ marginTop: 10, lineHeight: 1.7 }}>
+                <summary style={{ cursor: "pointer", color: theme.colors.active }}>使用引导</summary>
+                <p style={textStyle}>1. 先在「刷题范围」勾选章节，并手动进入所选起点。</p>
+                <p style={textStyle}>
+                    2.
+                    自动做题：开启「自动答题」和「全自动刷题」，按需开启「自动提交」。开启自动等待时，等日志中的等待结束后才切换。
+                </p>
+                <p style={textStyle}>
+                    3.
+                    仅刷时长：关闭「全自动刷题」及「自动答题」，开启「自动挂机」；切换上下限单位为分钟。按需开启随机延时和循环挂机。
+                </p>
+                <p style={textStyle}>
+                    4.
+                    更新后重新加载扩展并刷新整个课程页面。关闭开关不能撤回已提交的答案，时长和进度以平台记录为准。
+                </p>
+            </details>
         </div>
     );
 });

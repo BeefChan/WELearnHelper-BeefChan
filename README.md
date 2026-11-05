@@ -195,12 +195,21 @@ node tools/cdp.mjs close
 - 基础提交：`3dddb2af63e8004bf60416df3a62b72095206f5d`。
 - 修改基础：提供的 `WELearnHelper1.1.0.crx` 解包目录。
 - 保留上游 **GNU GPL v3** 许可证，见 [LICENSE](LICENSE)。
-- 本版本源码：[`src/`](src)（实际安装使用的扩展脚本，可直接修改）
-- 上游完整工程：[`upstream/v1.1.0/`](upstream/v1.1.0)（未修改的 TypeScript 源码、锁文件与构建脚本，可用于重建 1.1.0 基线）
-- 修改清单：[PATCHES.md](PATCHES.md)（本分支改动项与上游对应位置，供移植回源码使用）
+- 本版本源码：[`upstream/v1.1.0/`](upstream/v1.1.0)（**TypeScript 正式源码**，本分支所有改动都在这里，可构建）
+- 已发布产物：[`src/`](src)（1.3.3 的构建产物，归档对照用，不再修改）
+- 修改清单与构建说明：[PATCHES.md](PATCHES.md)
 - 来源与修改归属见 [UPSTREAM.md](UPSTREAM.md)，版本记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-本分支直接修改构建产物，因此 `src/` 就是本版本的可修改源码；`upstream/v1.1.0/` 与上游标签逐字节一致，可独立构建。两者的差异集中在 [PATCHES.md](PATCHES.md) 列出的修改项，尚未合并回 TypeScript 源码。
+源码已从「直接改构建产物」迁移为「改 TypeScript 后构建」：
+
+```powershell
+cd upstream/v1.1.0
+npm install
+npm run build:crx   # 产出 dist/
+npm run package     # 生成 manifest.json + icon.png 并打包 zip
+```
+
+以后修 bug 请改 `upstream/v1.1.0/src/`，不要再改根目录 `src/`。
 
 ## 网络连接与数据
 

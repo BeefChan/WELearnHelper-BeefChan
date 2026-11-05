@@ -1,17 +1,21 @@
 import styled from "@emotion/styled";
 
-export const MenuBar = styled.div(
+export const MenuBar = styled.div<{ isDragging: boolean }>(
     {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        gap: 12,
         userSelect: "none",
-        padding: "8px 8px",
+        padding: "14px 16px",
         position: "relative",
-        height: 50,
-        fontFamily: "华文新魏",
+        minHeight: 68,
+        height: "auto",
+        flexShrink: 0,
+        background: "#fff",
+        borderBottom: "1px solid #dce5ec",
     },
-    ({ isDragging }: { isDragging: boolean }) => ({
+    ({ isDragging }) => ({
         cursor: isDragging ? "grabbing" : "grab",
     }),
 );

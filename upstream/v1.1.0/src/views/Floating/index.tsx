@@ -1,56 +1,18 @@
-import { css, keyframes } from "@emotion/react";
-import { animated, useSpring } from "@react-spring/web";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Draggable from "react-draggable";
+
 import { store, useStore } from "../../store";
 import PopOver from "../components/PopOver";
 
 export function FloatingBall() {
-    const {
-        visibility,
-        position: { floating, log },
-    } = useStore();
+    const { visibility } = useStore();
 
     const [isDragging, setIsDragging] = useState(false);
 
-    // useEffect(() => {
-    //     store.setPosition("floating", {
-    //         x: log.x,
-    //         y: log.y,
-    //     });
-    // }, [log.x, log.y]);
-
-    // const breathingColor = "rgba(84, 223, 130, 0.75)";
-    const inhaleColor = "limegreen";
-    const exhaleColor = "rgba(84, 223, 130, 0.75)";
-
-    // const breathing = keyframes
-    //     from {
-    //         box-shadow: 0px 0px 5px 0px ${breathingColor} inset;
-    //     }
-    //     to {
-    //         box-shadow: 0px 0px 25px 0px ${breathingColor} inset;
-    //     }
-    // `;
-
-    const [spring, api] = useSpring(() => ({
-        from: {
-            boxShadow: `0px 0px 5px 0px ${exhaleColor} inset`,
-        },
-        to: [
-            {
-                boxShadow: `0px 0px 25px 0px ${inhaleColor} inset`,
-            },
-            {
-                boxShadow: `0px 0px 5px 0px ${exhaleColor} inset`,
-            },
-        ],
-        config: {
-            // ...config.wobbly,
-            duration: 3000,
-        },
-        loop: true,
-    }));
+    const openLogPanel = () => {
+        store.setVisibility("floating", false);
+        store.setVisibility("log", true);
+    };
 
     return (
         <Draggable
@@ -59,46 +21,44 @@ export function FloatingBall() {
             onStart={() => {
                 setIsDragging(true);
             }}
-            // onDrag={(e, data) => {
-            //     store.setPosition("floating", {
-            //         x: data.x,
-            //         y: data.y,
-            //     });
-            // }}
-            onStop={(e, data) => {
+            onStop={() => {
                 setIsDragging(false);
-                // store.setPosition("floating", {
-                //     x: data.x,
-                //     y: data.y,
-                // });
             }}
-            // position={{
-            //     x: floating.x,
-            //     y: floating.y,
-            // }}
         >
-            <animated.div
+            <div
                 id="floating-ball"
+                role="button"
+                tabIndex={0}
+                aria-label="WELearn 助手；双击打开记录面板"
+                title="双击打开助手面板，拖动可移动"
+                onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        openLogPanel();
+                    }
+                }}
+                onDoubleClick={openLogPanel}
                 style={{
                     position: "fixed",
-                    top: 100,
-                    right: 100,
+                    top: "auto",
+                    right: 24,
+                    bottom: 24,
                     zIndex: 101,
-                    background: "rgba(255, 255, 255, 0.95)",
-                    // border: "black 2px solid",
-                    borderRadius: "50%",
-                    width: 70,
-                    height: 70,
+                    width: 64,
+                    height: 64,
                     display: visibility.floating ? "flex" : "none",
                     justifyContent: "center",
                     alignItems: "center",
+                    padding: 0,
+                    background: "#123f4b",
+                    color: "#fff",
+                    border: "1px solid #32636d",
+                    borderRadius: 20,
+                    boxShadow: "0 8px 28px rgba(18, 63, 75, 0.25)",
+                    fontWeight: 700,
+                    fontSize: 15,
+                    lineHeight: 1.4,
                     cursor: isDragging ? "grabbing" : "grab",
-                    /* animation: `${breathing} s linear infinite`, */
-                    ...(visibility.floating ? spring : {}), // 避免动画在隐藏时执行
-                }}
-                onDoubleClick={() => {
-                    store.setVisibility("floating", false);
-                    store.setVisibility("log", true);
                 }}
             >
                 <PopOver
@@ -106,7 +66,6 @@ export function FloatingBall() {
                     disabled={isDragging}
                     placement={"top"}
                     offsetPixel={24}
-                    // openDelay
                 >
                     <div
                         style={{
@@ -114,10 +73,30 @@ export function FloatingBall() {
                             height: "100%",
                         }}
                     >
-                        悬浮球
+                        <span
+                            className="eocs-launcher-label"
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                lineHeight: 1.4,
+                            }}
+                        >
+                            WE
+                            <small
+                                style={{
+                                    fontSize: 10,
+                                    letterSpacing: 1,
+                                    color: "#c4e9ed",
+                                }}
+                            >
+                                助手
+                            </small>
+                        </span>
                     </div>
                 </PopOver>
-            </animated.div>
+            </div>
         </Draggable>
     );
 }

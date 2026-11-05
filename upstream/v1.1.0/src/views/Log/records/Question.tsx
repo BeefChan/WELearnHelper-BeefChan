@@ -124,7 +124,7 @@ export function QuestionRecord({ record }: { record: IQuestionRecord }) {
                         ? record.content.info.color
                         : theme.answerTypeColorMapping[record.content.info.content] ?? "gray",
                     color: "white",
-                    fontFamily: "华文新魏",
+                    fontFamily: "inherit",
                 }}
             >
                 {/* 标答、无答案、GPT */}

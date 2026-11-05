@@ -1,7 +1,7 @@
 {
     "name": "welearn_helper",
-    "version": "1.1.0",
-    "author": "SSmJaE",
+    "version": "1.3.3",
+    "author": "SSmJaE (upstream) / BeefChan (this fork)",
     "license": "GPL-3.0",
     "private": true,
     "type": "module",
@@ -9,6 +9,7 @@
         "dev": "vite --config ./build/vite.userscript.ts",
         "build:js": "tsc && vite build --config ./build/vite.userscript.ts",
         "build:crx": "tsc && vite build --config ./build/vite.extension.index.ts --emptyOutDir && vite build --config ./build/vite.extension.inject.ts && vite build --config ./build/vite.extension.content.ts && vite build --config ./build/vite.extension.background.ts",
+        "package": "node scripts/package-extension.mjs",
         "preview": "vite preview"
     },
     "dependencies": {

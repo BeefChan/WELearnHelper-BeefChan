@@ -7,8 +7,19 @@ import { store, useStore } from "../../store";
 import { GenericSetting } from "../../utils/setting";
 import Switch from "../components/Switch";
 
+const inputStyle = {
+    background: "#f7fafc",
+    color: "#182c3c",
+    border: "1px solid #cfdae4",
+    borderRadius: 8,
+    padding: "6px 8px",
+    fontSize: 13,
+    fontFamily: "inherit",
+    lineHeight: "normal",
+} as const;
+
 export function ConfigControl({
-    genericSetting: { id, valueType, readonly },
+    genericSetting: { id, name, valueType, readonly },
 }: {
     genericSetting: GenericSetting;
 }) {
@@ -58,21 +69,27 @@ export function ConfigControl({
         onChangeDebounced(localValue);
     }, [localValue]);
 
+    const elementId = `eocs-setting-${String(id)}`;
+
     let element: JSX.Element;
 
     switch (valueType) {
         case "string":
             element = (
                 <textarea
+                    id={elementId}
+                    aria-label={name}
                     value={localValue as string}
                     onBlur={(e) => setLocalValue(e.target.value)}
                     onChange={(e) => setLocalValue(e.target.value)}
                     disabled={readonly}
                     style={{
-                        resize: "none",
+                        ...inputStyle,
+                        width: 160,
+                        maxWidth: "100%",
+                        minHeight: 34,
                         height: 40,
-                        fontSize: 16,
-                        lineHeight: "normal",
+                        resize: "none",
                     }}
                 ></textarea>
             );
@@ -81,12 +98,16 @@ export function ConfigControl({
         case "number":
             element = (
                 <input
+                    id={elementId}
+                    aria-label={name}
                     type={"number"}
                     value={localValue as number}
                     onBlur={(e) => setLocalValue(e.target.value)}
                     onChange={(e) => setLocalValue(e.target.value)}
                     style={{
-                        width: 60,
+                        ...inputStyle,
+                        width: 82,
+                        minHeight: 34,
                         textAlign: "center",
                     }}
                     disabled={readonly}
@@ -97,6 +118,7 @@ export function ConfigControl({
         case "boolean":
             element = (
                 <Switch
+                    id={elementId}
                     height={22}
                     checked={localValue as boolean}
                     onChange={setLocalValue}

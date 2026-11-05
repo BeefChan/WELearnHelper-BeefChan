@@ -1,5 +1,7 @@
 // import Swal from "sweetalert2";
 import logger from "@/src/utils/logger";
+import { collectScoItems } from "@src/projects/welearn/sco/parser";
+import { jumpToNextSelectedSco, loadScoSelection } from "@src/projects/welearn/sco/selection";
 import { CONSTANT, store } from "@src/store";
 import { getValue, setValue } from "@utils/polyfill";
 
@@ -27,6 +29,23 @@ function generateRandomInterval() {
 
 function nextChapter() {
     const topWindow = top as Window;
+
+    // 先按用户勾选的「刷题范围」跳转；null 表示没有设置范围，交回原来的逻辑
+    const selectionJump = jumpToNextSelectedSco(topWindow.document);
+    if (selectionJump !== null) {
+        if (selectionJump === false) {
+            const selection = loadScoSelection(topWindow.document);
+            const anySelected = collectScoItems(topWindow.document).some(
+                (item) => selection[item.id] !== false,
+            );
+            logger.info({
+                content: anySelected
+                    ? "已到所选范围末尾，自动切换停止"
+                    : "没有勾选任何要刷的节，自动切换停止",
+            });
+        }
+        return selectionJump;
+    }
 
     const jumpButtons =
         topWindow.document.querySelectorAll<HTMLLinkElement>('a[onclick^="SelectSCO"]');

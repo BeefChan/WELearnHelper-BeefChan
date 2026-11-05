@@ -1,52 +1,52 @@
-import { useTheme } from "@emotion/react";
-
 import { GenericSetting } from "../../utils/setting";
 import { ConfigControl } from "./ConfigControl";
 import { ConfigItem } from "./index";
 
 export function ConfigSection({ settings }: { settings: readonly GenericSetting[] }) {
-    const theme = useTheme();
-
     return (
         <>
-            {settings.map((setting, index) => {
+            {settings.map((setting) => {
+                const settingId = String(setting.id);
+
                 return (
-                    <ConfigItem
-                        key={`${String(setting.id)}-${setting.name}`}
-                        style={{
-                            marginTop: index === 0 ? 0 : 8,
-                        }}
-                    >
+                    <ConfigItem className="eocs-setting" key={settingId}>
                         <div
+                            className="eocs-setting-title"
                             style={{
-                                fontSize: 20,
-                                marginBottom: 8,
-                                height: 40,
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "space-between",
+                                gap: 10,
+                                minHeight: 30,
+                                marginBottom: 5,
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: "#182c3c",
                                 lineHeight: "normal",
                             }}
                         >
-                            {setting.name}
+                            <label htmlFor={`eocs-setting-${settingId}`} style={{ cursor: "pointer" }}>
+                                {setting.name}
+                            </label>
 
                             <div
                                 style={{
-                                    maxHeight: 40,
                                     display: "flex",
                                     alignItems: "center",
+                                    flexShrink: 0,
                                     lineHeight: "normal",
                                 }}
                             >
                                 <ConfigControl genericSetting={setting} />
                             </div>
                         </div>
+
                         <div
+                            className="eocs-setting-description"
                             style={{
-                                fontSize: 16,
-                                // color: theme.colors.secondary,
-                                color: "rgb(161, 156, 156)",
-                                lineHeight: "normal",
+                                fontSize: 12,
+                                lineHeight: 1.6,
+                                color: "#536779",
                             }}
                         >
                             {setting.description}

@@ -18,6 +18,12 @@ import { solveDataSolution } from "./dataSolution/solver";
 
 import { parseReading } from "./reading/parser";
 import { WELearnAPI } from "@api/welearn";
+import {
+    etAutoNextFlow,
+    markAutoNextReady,
+    registerAutoNextListener,
+    watchAutoNextReady,
+} from "../onetap/autoFlow";
 
 export async function initialCourseCatalog() {
     const catalog = await WELearnAPI.getCourseCatalog();
@@ -135,21 +141,26 @@ export async function determineCourseType(iframeUrl: string) {
     let answers: Answer[] = [];
 
     let hasAnswer = false;
+    // 记录命中的课程类型；未适配页面为空，全自动流程不会在未适配页面上触发
+    let solveType = "";
 
     if (MANIFEST.includes(courseInfo)) {
         //需要查询名单
+        solveType = "manifest";
         dom = await queryManifest(manifestUrl, identifier as string, courseInfo);
 
         answers = parseManifest(dom);
         if (document.querySelector('div[id^="word"]')) parseWordTest();
 
-        if (store.userSettings.autoSolve) solveManifest(answers);
+        if (store.userSettings.autoSolve) await solveManifest(answers);
     } else if (ET.includes(courseInfo)) {
+        solveType = "et";
         dom = await queryData(answerUrl);
 
         answers = parseEt(dom);
-        if (store.userSettings.autoSolve) solveEt(answers);
+        if (store.userSettings.autoSolve) await solveEt(answers);
     } else if (DATA_SOLUTION.includes(courseInfo)) {
+        solveType = "dataSolution";
         //直接在原始页面查找
         setTimeout(() => {
             answers = parseDataSolution();
@@ -167,6 +178,7 @@ export async function determineCourseType(iframeUrl: string) {
             }
         }, 2000);
     } else if (READING.includes(courseInfo)) {
+        solveType = "reading";
         let answerUrl =
             location.href.split("&")[0].replace("web.html?courseurl=", "data/") + ".xml";
         dom = await queryData(answerUrl);
@@ -182,10 +194,28 @@ export async function determineCourseType(iframeUrl: string) {
         // add_to_container("", document.querySelectorAll(".tianking .tl_daan"));
     }
 
+    // dataSolution 的答案解析在 2 秒后异步完成，先等答案落地，保证 hasAnswers 判定准确
+    if (solveType === "dataSolution" && !answers.length) await sleep(2500);
+
     logger.debug(answers);
 
     if (answers.length) {
         hasAnswer = true;
         outputAnswers(answers);
     }
+
+    // 本节解析完成：记录可继续状态；开着「全自动刷题」时进入 等待 -> 提交 -> 下一节 流程。
+    // 注意：上游的自动作答是 fire-and-forget，自动等待默认开启（至少随机 60 秒），
+    // 通常足够答案写入课件组件；若关闭「自动等待」，建议把 solveEt/solveManifest 改为 await。
+    if (solveType && store.userSettings.autoSolve) {
+        markAutoNextReady(answers.length > 0);
+        if (store.userSettings.autoNext) {
+            void etAutoNextFlow(answers.length > 0);
+        }
+    }
 }
+
+// 顶层课程播放器页面接收课件的 AUTO_NEXT 通知并切换下一节（非顶层窗口内监听器会直接返回）。
+registerAutoNextListener();
+// 本节处理完后再开启「全自动刷题」时，接着本节的等待/提交流程（仅课件页面生效）。
+watchAutoNextReady();

@@ -145,3 +145,32 @@ async function fromInjectToContent(messageEvent: MessageEvent<IExtensionMessage>
 // }
 
 window.addEventListener("message", fromInjectToContent, false);
+
+/**
+ * 设置变化时通知页面内已注入的脚本。
+ * 主页面与 iframe 各自持有 store 副本，靠这个广播保持一致。
+ */
+function forwardSettingsChanged(changes: Record<string, chrome.storage.StorageChange>, area: string) {
+    if (area !== "sync" || !changes.userSettings) return;
+
+    let settings: unknown = changes.userSettings.newValue;
+    if (typeof settings === "string") {
+        try {
+            settings = JSON.parse(settings);
+        } catch (e) {
+            return;
+        }
+    }
+    if (!settings || typeof settings !== "object" || Array.isArray(settings)) return;
+
+    window.postMessage(
+        {
+            extensionName: EXTENSION_NAME_CONTENT,
+            type: "settingsChanged",
+            payload: settings,
+        },
+        "*",
+    );
+}
+
+chrome.storage.onChanged.addListener(forwardSettingsChanged);

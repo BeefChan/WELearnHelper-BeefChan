@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Draggable from "react-draggable";
 
-import { useTheme } from "@emotion/react";
 import styled from "@emotion/styled";
 import Close from "@icon-park/react/es/icons/Close";
 import { animated, config, useSpring } from "@react-spring/web";
-
 import { store, useStore } from "../../store";
 import { MenuBar } from "../components/MenuBar";
 import { MenuButton } from "../components/MenuButton";
@@ -13,48 +11,41 @@ import PopOver from "../components/PopOver";
 import { ConfigSection } from "./ConfigSection";
 import { IPanel, TabContainer } from "./TabContainer";
 
-export const ConfigItem = styled.div(
-    {
-        position: "relative",
-        border: "1px solid black",
-        padding: 8,
-        // margin: 4,
-        borderRadius: 4,
+/** 设置项卡片 */
+export const ConfigItem = styled.div({
+    position: "relative",
+    marginBottom: 8,
+    padding: "12px 14px",
+    border: "1px solid #e0e7ee",
+    borderRadius: 12,
+    background: "#fff",
+    transition: "border-color .15s",
+    "&:hover": {
+        borderColor: "#b6d6db",
     },
-    ({ theme }) => ({
-        "&:hover": {
-            boxShadow: "0px 0px 8px 0px rgba(0,0,0,0.75)",
-            // backgroundColor: theme.colors.secondary,
-        },
-    }),
-);
+});
 
-const ConfigPanelContainer = styled(animated.div)<{}>(
-    {
-        flexDirection: "column",
+const ConfigPanelContainer = styled(animated.div)({
+    flexDirection: "column",
+    width: "min(590px, calc(100vw - 32px))",
+    maxHeight: "calc(100vh - 104px)",
+    position: "fixed",
+    top: 80,
+    right: 24,
+    zIndex: 2147482001,
 
-        width: 600,
-        position: "fixed",
-        top: 100,
-        right: 100,
-        zIndex: 101,
-
-        background: "rgba(255, 255, 255, 0.95)",
-        border: "black 2px solid",
-        borderRadius: 10,
-        boxShadow:
-            "0 11px 15px -7px rgba(0, 0, 0, 0.2),0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12)",
-    },
-    ({}) => ({}),
-);
+    background: "#f4f7fa",
+    border: "1px solid #dce5ec",
+    borderRadius: 16,
+    boxShadow: "0 16px 52px rgba(32, 55, 75, 0.16), 0 2px 8px rgba(32, 55, 75, 0.05)",
+    overflow: "hidden",
+});
 
 export function ConfigPanel() {
     const { sectionSettings, visibility } = useStore();
 
-    const theme = useTheme();
-
     const panel: IPanel[] = useMemo(() => {
-        return sectionSettings.map((sectionSetting, index) => ({
+        return sectionSettings.map((sectionSetting) => ({
             label: sectionSetting.title,
             content: <ConfigSection settings={sectionSetting.settings} />,
         }));
@@ -62,7 +53,7 @@ export function ConfigPanel() {
 
     const [isDragging, setIsDragging] = useState(false);
 
-    const [spring, api] = useSpring(
+    const [spring] = useSpring(
         () => ({
             opacity: visibility.config ? 1 : 0,
             scale: visibility.config ? 1 : 0,
@@ -106,27 +97,21 @@ export function ConfigPanel() {
                     ...spring,
                 }}
             >
-                <MenuBar
-                    id="config-panel-menu-bar"
-                    isDragging={isDragging}
-                    style={{
-                        borderBottom: "2px solid black",
-                    }}
-                >
+                <MenuBar id="config-panel-menu-bar" isDragging={isDragging}>
                     <div
                         style={{
-                            fontSize: 24,
+                            fontSize: 16,
+                            fontWeight: 700,
+                            color: "#182c3c",
                         }}
                     >
-                        设置面板
+                        偏好设置
                     </div>
 
                     <PopOver key="config-panel-close-button" content="关闭设置面板">
                         <MenuButton
                             id="config-panel-close-button"
-                            style={{
-                                lineHeight: "normal",
-                            }}
+                            aria-label="关闭设置面板"
                             onClick={() => {
                                 store.setVisibility("config", false);
                             }}
@@ -134,8 +119,8 @@ export function ConfigPanel() {
                             {/* ❌ */}
                             <Close
                                 theme="filled"
-                                size="28"
-                                fill={theme.colors.error}
+                                size="20"
+                                fill="#b84949"
                                 strokeWidth={7}
                             />
                         </MenuButton>

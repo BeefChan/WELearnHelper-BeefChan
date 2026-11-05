@@ -47,19 +47,20 @@ function parseAnswer(element: HTMLElement) {
     let answerText = "";
     switch (tag) {
         case "et-tof":
-            answerText = element.getAttribute("key") as string;
+            answerText = element.getAttribute("key") || "";
 
             break;
 
         case "et-blank":
             if (isRepeat(element)) return;
-            answerText = element.textContent!.split("|")[0];
+            //答案文件里的空白/换行不能带进答案，否则会被当成错误答案
+            answerText = (element.textContent || "").split("|")[0].trim();
             if (element.hasAttribute("block")) tag = "et-textarea";
 
             break;
 
         case "et-select":
-            answerText = element.getAttribute("key") as string;
+            answerText = element.getAttribute("key") || "";
             try {
                 //todo 这是哪个类型的题的故障处理？
                 if (!answerText.length)
@@ -77,16 +78,13 @@ function parseAnswer(element: HTMLElement) {
                     return;
                 }
             } //针对视听说2 7-1重复，
-            answerText = element.getAttribute("key") as string;
+            answerText = element.getAttribute("key") || "";
 
             break;
 
         case "et-matching":
             if (isRepeat(element)) return;
-            answerText = element
-                .getAttribute("key")!
-                .split(",")
-                .join("\n\t<br/>");
+            answerText = (element.getAttribute("key") || "").split(",").join("\n\t<br/>");
 
             break;
 
@@ -98,7 +96,7 @@ function parseAnswer(element: HTMLElement) {
             break;
 
         case "et-sort":
-            answerText = element.getAttribute("key") as string;
+            answerText = element.getAttribute("key") || "";
 
             break;
     }

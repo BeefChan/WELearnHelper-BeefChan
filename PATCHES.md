@@ -1,69 +1,59 @@
-# 相对上游 v1.1.0 的修改清单
+# 源码结构与修改清单
 
-本仓库包含两套代码：
+## 现在以 TypeScript 源码为准
 
-| 目录 | 内容 |
-| --- | --- |
-| `src/` | **实际安装使用的扩展**。由上游 v1.1.0 的构建产物修改而来，可直接加载 |
-| `upstream/v1.1.0/` | **上游原始工程**（TypeScript + Vite + 锁文件 + 构建脚本），只读参考 |
+修改已经**合并回 TypeScript 源码**，`upstream/v1.1.0/` 不再是只读的上游副本，而是本分支的正式源码工程：
 
-`upstream/v1.1.0/` 未做任何修改，与上游标签 `v1.1.0`（提交 `3dddb2a`）逐字节一致，可直接用于重建上游基线或作为移植目标。
+| 目录 | 内容 | 状态 |
+| --- | --- | --- |
+| `upstream/v1.1.0/` | **正式源码**（TypeScript + Vite）。本分支全部改动都在这里，可构建 | 可构建，`npm run build:crx` |
+| `src/`（仓库根） | 已发布 1.3.3 的**构建产物**（解包后可直装的脚本），保留用于对照与回滚 | 归档，不再修改 |
 
-## 为什么修改的是构建产物
+也就是说：以后改功能请改 `upstream/v1.1.0/src/`，然后重新构建，不要再改根目录 `src/`。
 
-本分支的修改起于已发布的 CRX 解包脚本，因此直接改的是打包后的 `src/index.js` 等文件，而非 TypeScript 源码。这意味着：
-
-- 仓库**提供了本版本的完整可修改源码**（即 `src/` 下的脚本），满足 GPL 对外提供对应源码的要求；
-- 仓库也**提供了可重建的上游工程**，任何人可以 `pnpm install && pnpm build:crx` 得到 1.1.0 基线，再对照本清单核对差异；
-- 但本分支的修改**尚未合并回 TypeScript 源码**。要彻底消除这一差异，需将下述改动逐条移植到 `upstream/v1.1.0/src/` 后重新构建。
-
-## 修改项对照
-
-### 1. 模块结构（`src/index.js`）
-
-| 位置 | 改动 |
-| --- | --- |
-| 目录解析 | 新增 `collectScoItems`、`scoIdFromLink`、`scoSelectionStorageKey`，按 `courseware_list_1_N` 层级还原「单元 → 技能 → 子模块」 |
-| 范围面板 | 新增 `buildScoSelectionPanel`、`watchScoSelectionPanel`、`loadScoSelection`、`saveScoSelection` |
-| 章节跳转 | 新增 `jumpToNextSelectedSco`、`getCurrentScoId`；`nextChapter` 改为优先按所选范围跳转 |
-| 自动流程 | 新增 `etAutoWait*`、`etAutoSubmitCurrent`、`etAutoNextFlow`、`etSleepWithAbort` |
-| 消息处理 | 重写 `handleAutoNextMessage`，按 iframe 来源树与 SCO 校验通知 |
-| 设置同步 | 新增 `settingsFingerprint` 与 `settingsChanged` 消息接收，避免回写循环 |
-| 版本检查 | 移除 `WELearnAPI.checkVersion()` 调用 |
-
-### 2. 题型处理（`src/index.js`）
-
-填空、选词、多空格、下拉、判断及连线题的答案写入改为操作课件组件数据模型，而非仅修改 DOM 文本。
-
-### 3. 界面（`src/ui.css` + `src/index.js`）
-
-新增独立样式表并由 `manifest.json` 的 `content_scripts.css` 加载；主面板、设置页、范围面板、悬浮球改为统一的卡片式布局，设置分类改为标签栏。
-
-### 4. 扩展清单与通信
-
-| 文件 | 改动 |
-| --- | --- |
-| `manifest.json` | 版本 1.1.0 → 1.3.3；`homepage_url` 改为本仓库；新增 `ui.css` 注入 |
-| `content.js` | 新增 `chrome.storage.onChanged` 监听，向已打开页面广播 `settingsChanged` |
-
-## 移植回 TypeScript 时的对应位置
-
-供后续把改动搬回上游工程时参考：
-
-| 本仓库文件 | 上游对应位置 |
-| --- | --- |
-| `src/index.js` 中的 SCO 范围逻辑 | `upstream/v1.1.0/src/projects/welearn/`（时间 / 课程切换相关） |
-| `src/index.js` 中的题型处理 | `upstream/v1.1.0/src/projects/welearn/exercise/` |
-| `src/index.js` 中的自动流程 | `upstream/v1.1.0/src/projects/welearn/onetap/` 与 `time/` |
-| `src/ui.css` 与面板样式 | `upstream/v1.1.0/src/views/` |
-| `src/content.js` 设置同步 | `upstream/v1.1.0/src/utils/polyfill/extension/` |
-
-## 重建上游基线
+## 从源码构建
 
 ```powershell
 cd upstream/v1.1.0
-node <pnpm.mjs> install --frozen-lockfile
-node <pnpm.mjs> build:crx
+npm install                 # 首次；已安装可跳过
+npm run build:crx           # 产出 dist/{index,inject,content,background}.js
+npm run package             # 生成 dist/manifest.json + icon.png 并打包 zip
 ```
 
-构建产物输出到 `upstream/v1.1.0/dist/`，可与本仓库 `src/` 对照，确认差异只来自上述修改项。
+`npm run package` 会读取 `metadata.json` 写入版本、主页、权限，避免手改清单。首次需要先在 `package.json` 的 scripts 里加 `"package"`（见下）。
+
+## 本分支相对上游 v1.1.0 的改动
+
+### 新增模块
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/projects/welearn/sco/parser.ts` | 解析课程目录：真实播放页是「同级列表 + `courseware_list_1_N` 层级编号」，按数字回溯拼出「单元 → 技能 → 子模块」；同时兼容标准嵌套 ul/li |
+| `src/projects/welearn/sco/selection.ts` | 按课程 / 班级隔离的勾选存储，非法数据与 storage 异常兜底，旧全局 key 一次性迁移；`jumpToNextSelectedSco` 负责按所选范围跳转 |
+| `src/projects/welearn/sco/panel.tsx` | 「刷题范围」浮层（纯 DOM），全选 / 全不选 / 恢复默认、半选、目录变化重建、跨标签页同步 |
+| `src/projects/welearn/onetap/autoFlow.ts` | 自动等待（媒体时长 + 随机）→ 自动提交（进度与答案校验）→ 自动下一节；iframe 来源树校验与 `AUTO_NEXT` 消息去重 |
+
+### 修改模块
+
+| 文件 | 改动 |
+| --- | --- |
+| `src/projects/welearn/time/main.ts` | `nextChapter()` 优先按所选范围跳转，再走原有逻辑 |
+| `src/projects/welearn/exercise/et/solver.ts` | 作答改为写入课件 Angular 组件数据模型（`blank.value`、`choice.value`、`select.value`、`tof.value`），连线改为点圆圈由课件写 `answers`；新增组件就绪等待、两轮重试、按组件幂等 |
+| `src/projects/welearn/exercise/et/parser.ts` | 答案去首尾空白；`key` 属性缺失时不再把 null 当字符串用 |
+| `src/projects/welearn/exercise/initial.ts` | 设置未加载完成不解析；同一页不重复处理 |
+| `src/projects/welearn/exercise/setting.ts` | 新增 9 个全自动相关设置项 |
+| `src/projects/welearn/exercise/main.ts` | 等待作答完成后再进入提交流程；记录可继续状态；开启全自动时启动流程 |
+| `src/projects/welearn/initial.ts` | 注册刷题范围面板；移除上游版本检查调用 |
+| `src/utils/polyfill/extension/content.ts` | 设置变化广播给已打开页面 |
+| `src/views/**` | 主窗口卡片化、运行状态条、设置页标签栏与卡片、关于页署名与使用引导、悬浮球改版 |
+| `metadata.json` | 版本 1.3.3 / 展示 1.33、主页改本仓库、维护者与协作署名 |
+
+### 已知与上游不一致的小取舍
+
+- 日志窗口沿用 `react-rnd` 固定像素宽度，未复刻发布版基于 CSS 的窄屏自适应；设置面板已自适应。
+- 数据源里的「口语 / 排序」等无标准答案题型仍不作答。
+
+## 已发布产物说明
+
+- Release `v1.3.3` 里的 ZIP 来自根目录 `src/`（当时直接改产物的版本）。
+- 由 TypeScript 源码重新构建的版本在 `upstream/v1.1.0/dist/`，可作为下一版（如 1.3.4）发布；两者的功能集合一致，实现位置不同。

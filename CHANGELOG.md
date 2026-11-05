@@ -61,3 +61,17 @@
 
 - 补充 README、上游来源说明、GPL 许可证、上传指南及默认提交白名单。
 - 明确当前仍是解包脚本维护版，记录源码构建、内部版本元数据、后端与主页信息的发布前待办。
+
+## 源码迁移完成 — 2026-11-05
+
+四个并行子任务把已发布的修补回迁到上游 TypeScript 工程，`upstream/v1.1.0/` 从此成为正式源码：
+
+- 新增 `projects/welearn/sco/`（目录解析、勾选存储、范围面板）：26 项范围回归对重写的 TS 实现全部通过
+- 新增 `projects/welearn/onetap/autoFlow.ts`（等待→提交→下一节、iframe 校验、消息去重）：9 项 vm 冒烟全过
+- 回迁题型处理到 `exercise/et/solver.ts`、`et/parser.ts`、`parsers/连线题.ts`
+- 回迁界面到 `views/**`（13 个组件），CDP 截图断言通过
+- 整合修正：设置未加载不解析、同页不重复处理、等待作答完成后再提交
+- `metadata.json` 版本 1.3.3、主页改本仓库、维护者与协作署名
+- 新增 `scripts/package-extension.mjs` 与 `npm run package`，替换依赖 python 的发布脚本
+- 验证：全量 `tsc --noEmit` 通过；`npm run build:crx` 成功（index.js 891 KB）；Edge `--pack-extension` 生成 CRX 成功（清单合法）
+- 根目录 `src/` 转为归档产物，不再修改
