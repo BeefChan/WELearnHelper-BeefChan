@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const source = fs.readFileSync('src/index.js','utf8').replace(/\r\n/g,'\n');
 const part = (a,b) => {const start=source.indexOf(a);const end=source.indexOf(b,start);assert(start>=0&&end>start,`missing ${a}`);return source.slice(start,end);};
-const handler=part('  let autoNextPending =','  WELearnAPI.checkVersion();');
+const handler=part('  let autoNextPending =','  window.addEventListener("message", handleAutoNextMessage, false);');
 const flow=part('  async function etSleepWithAbort(','  function parseManifest(');
 const jump=part('  function jumpToNextSelectedSco(','  let scoPanelSignature');
 const bridge=part('  const settingsFingerprint =','  const CONSTANT =');

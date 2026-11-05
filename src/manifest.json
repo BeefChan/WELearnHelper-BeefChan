@@ -58,7 +58,7 @@
             ]
         }
     ],
-    "homepage_url": "https://www.github.com/SSmJaE/",
+    "homepage_url": "https://github.com/BeefChan/WELearnHelper-BeefChan",
     "content_security_policy": {
         "extension_pages": "default-src 'self'; script-src 'self'; connect-src http://localhost http://47.100.166.53;"
     }

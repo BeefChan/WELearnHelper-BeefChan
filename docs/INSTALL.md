@@ -6,7 +6,7 @@
 
 使用已发布安装包时，下载：
 
-`WELearnHelper-1.3.3-BeefChan-UI-r2.zip`
+`WELearnHelper-1.3.3-BeefChan-UI-r3.zip`
 
 解压后找到直接包含 `manifest.json`、`index.js` 和 `ui.css` 的目录。不要在扩展页面选择 ZIP 压缩包本身。
 

@@ -2083,7 +2083,7 @@ var __publicField = (obj, key, value) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   const apiServer = "http://47.100.166.53/api";
-  const homepage = "https://www.github.com/SSmJaE/";
+  const homepage = "https://github.com/BeefChan/WELearnHelper-BeefChan";
   const projects = {
     welearn: {
       title: "随行课堂网课助手",
@@ -4770,7 +4770,8 @@ var __publicField = (obj, key, value) => {
   }
   window.addEventListener("message", handleAutoNextMessage, false);
 
-  WELearnAPI.checkVersion();
+  // 本分支不再调用上游版本检查接口：其提示只适用于原作者版本，
+  // 且会把本分支版本号发送到第三方服务器。
   const index$2 = "";
   var reactDomExports = {};
   var reactDom = {
