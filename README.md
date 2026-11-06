@@ -1,8 +1,10 @@
 # WELearnHelper 1.3.4 · BeefChan 非官方修复版
 
-基于 [SSmJaE/WELearnHelper](https://github.com/SSmJaE/WELearnHelper) **1.10（v1.1.0）** 继续修改，主要修复刷时长相关功能失效、重新适配自动答题的多种题型，并新增刷题范围、自动等待及自动下一节等功能。
+基于 [SSmJaE/WELearnHelper](https://github.com/SSmJaE/WELearnHelper) **1.1.0** 继续修改，主要修复刷时长相关功能失效、重新适配自动答题的多种题型，并新增刷题范围、自动等待及自动下一节等功能。
 
-**当前版本：1.3.4。** 原版基线为 1.1.0。
+**当前版本：1.3.4。** 原版基线为 1.1.0。项目地址：<https://github.com/BeefChan/WELearnHelper-BeefChan>
+
+> **本版本未经过大规模充分测试。** 覆盖的教材、题型和页面结构有限，可能存在未适配或回归问题；请先在少量章节验证，确认符合预期后再批量使用。
 
 ## 原作者与修改维护
 
@@ -17,7 +19,13 @@
 
 “原作者维护到 1.1.0、BeefChan 修改到 1.3.4”描述的是**本分支采用的版本衔接关系**，不表示已核实上游永久停更，也不代表原作者或 WE Learn 官方认可这些修改。
 
-> 当前仓库基于原版扩展解包后的 JavaScript 修改，并非上游完整的 TypeScript / React 开发工程；没有 `npm run build` 或 `pnpm build` 流程，源码仍待迁回上游原始工程与构建流程。
+## 源码形态
+
+本分支已从「直接改构建产物」迁移为**修改 TypeScript 源码后构建**：
+
+- `upstream/v1.1.0/` 是**正式源码**（TypeScript + Vite + 锁文件 + 构建脚本），本分支所有改动都在这里，可直接 `npm run build:crx` 重新构建；
+- 根目录 `src/` 保留为 1.3.3 的构建产物，仅作对照与回滚，**不再修改**；
+- 以后修 bug 请改 `upstream/v1.1.0/src/`。
 
 ## 修复了哪些问题
 
@@ -78,16 +86,25 @@
 
 ## 安装与更新
 
-按 Edge / Chrome 分步安装、更新和故障排查见[完整安装说明](docs/INSTALL.md)。这里保留快速安装步骤：
+**推荐方式：下载 [Releases](https://github.com/BeefChan/WELearnHelper-BeefChan/releases) 里的 `WELearnHelper-1.3.4.zip`。** 按 Edge / Chrome 分步说明和故障排查见[完整安装说明](docs/INSTALL.md)。
 
-1. 下载本仓库并解压，或使用维护者提供的扩展 ZIP。
+1. 解压安装包，记住解压目录（安装后不要移动或删除）。
 2. Edge 打开 `edge://extensions/`；Chrome 打开 `chrome://extensions/`。
-3. 开启“开发人员模式 / 开发者模式”。
-4. 点击“加载解压缩的扩展”：仓库版选择 **`src` 文件夹**；安装包选择直接包含 `manifest.json` 的文件夹。
+3. 开启「开发人员模式 / 开发者模式」。
+4. 点击「加载解压缩的扩展 / 加载已解压的扩展程序」，选择**直接包含 `manifest.json`** 的文件夹。
 5. 停用旧版或重复安装的助手，避免多个版本同时运行。
-6. 打开课程学习页面，刷新整个页面，检查悬浮窗“关于”中的版本是否为 **1.3.4**。
+6. 打开课程学习页面，刷新整个页面，检查悬浮窗「关于」中的版本是否为 **1.3.4**。
 
-更新本地加载的扩展：替换文件 → 扩展管理页点击“重新加载” → 刷新整个课程页面。**只刷新内部课件 iframe 不足以更新主页面脚本。**
+从源码构建安装包：
+
+```powershell
+cd upstream/v1.1.0
+npm install
+npm run build:crx   # 产出 dist/ 下的 index.js、inject.js、content.js、background.js
+npm run package     # 生成 dist/manifest.json 与 icon.png，并打包 zip
+```
+
+更新已安装的扩展：替换文件 → 扩展管理页点击「重新加载」→ 刷新整个课程页面。**只刷新内部课件 iframe 不足以更新主页面脚本。**
 
 ## 详细使用方法
 
@@ -167,18 +184,26 @@
 
 ## 验证与开发
 
-| 验证 | 记录 | 边界 |
+| 验证 | 结果 | 说明 |
 | --- | --- | --- |
-| 范围选择回归 | 26 项通过 | 独立 Edge 的目录样例、勾选、保存、停止、循环等 |
-| 自动下一节回归 | 12 项通过 | 模拟主页面 / iframe，调用实际流程和范围跳转函数 |
-| UI 布局回归 | 桌面与 390px 手机视口通过 | 独立 Edge 检查样式加载、按钮尺寸与视口边界 |
-| 真实课程连续自动切换 | 未完成完整验证 | 不将模拟测试表述为真实课程端到端验证 |
+| 类型检查 | 通过 | `tsc --noEmit` 全量无诊断 |
+| 扩展构建 | 通过 | `npm run build:crx` 产出 index / inject / content / background |
+| 清单合法性 | 通过 | Edge `--pack-extension` 成功生成 CRX |
+| 范围选择回归 | 26 项通过 | 目录解析、勾选、保存、停止、循环、跨课程隔离 |
+| 自动下一节回归 | 12 项通过 | 模拟主页面 / iframe，调用实际流程与范围跳转 |
+| UI 布局回归 | 桌面与 390px 视口通过 | 样式加载、按钮尺寸、视口边界 |
 
-Node.js 22+；浏览器测试另需 Edge：
+**尚未做真实课程的完整端到端验证**；上述为构建检查与自动化回归，不代表所有教材、题型都可用。
+
+Node.js 22+；浏览器相关测试另需 Edge：
 
 ```powershell
-node --check src/index.js
-node --check src/content.js
+cd upstream/v1.1.0
+npm install
+npm run build:crx
+npm run package
+
+cd ../..
 node tools/auto-next-selftest.mjs
 $env:CDP_PORT = '9333'
 node tools/cdp.mjs launch
@@ -189,27 +214,14 @@ node tools/cdp.mjs close
 
 调试工具使用独立配置目录，不要上传浏览器登录配置或将测试连接到不准备调试的个人会话。
 
-## 来源、许可证与发布说明
+## 来源与许可证
 
-- 上游：[SSmJaE/WELearnHelper](https://github.com/SSmJaE/WELearnHelper)，基础标签 [v1.1.0](https://github.com/SSmJaE/WELearnHelper/tree/v1.1.0)。
-- 基础提交：`3dddb2af63e8004bf60416df3a62b72095206f5d`。
-- 修改基础：提供的 `WELearnHelper1.1.0.crx` 解包目录。
-- 保留上游 **GNU GPL v3** 许可证，见 [LICENSE](LICENSE)。
-- 本版本源码：[`upstream/v1.1.0/`](upstream/v1.1.0)（**TypeScript 正式源码**，本分支所有改动都在这里，可构建）
-- 历史产物：[`src/`](src)（1.3.3 的构建产物，仅归档对照，不再修改）
-- 修改清单与构建说明：[PATCHES.md](PATCHES.md)
-- 来源与修改归属见 [UPSTREAM.md](UPSTREAM.md)，版本记录见 [CHANGELOG.md](CHANGELOG.md)。
+- 上游：[SSmJaE/WELearnHelper](https://github.com/SSmJaE/WELearnHelper)，基础标签 [v1.1.0](https://github.com/SSmJaE/WELearnHelper/tree/v1.1.0)，提交 `3dddb2af63e8004bf60416df3a62b72095206f5d`。
+- 修改起点：上游 1.1.0 的已发布 CRX 解包目录。
+- 保留上游 **GNU GPL v3** 许可证，见 [LICENSE](LICENSE)；原作者及第三方组件的版权声明一并保留。
+- 改动清单与源码对应关系：[PATCHES.md](PATCHES.md)；来源与同步上游的方法：[UPSTREAM.md](UPSTREAM.md)；版本记录：[CHANGELOG.md](CHANGELOG.md)。
 
-源码已从「直接改构建产物」迁移为「改 TypeScript 后构建」：
-
-```powershell
-cd upstream/v1.1.0
-npm install
-npm run build:crx   # 产出 dist/
-npm run package     # 生成 manifest.json + icon.png 并打包 zip
-```
-
-以后修 bug 请改 `upstream/v1.1.0/src/`，不要再改根目录 `src/`。
+分发修改后的扩展时，需按 GPL 提供本版本对应源码：本仓库的 `upstream/v1.1.0/` 即为可直接构建的全部源码。
 
 ## 网络连接与数据
 
@@ -223,12 +235,21 @@ npm run package     # 生成 manifest.json + icon.png 并打包 zip
 
 ## 项目结构
 
-- `src/`：可直接加载的扩展；主脚本、通信脚本、扩展清单与图标。
-- `tools/`：离线测试和独立 Edge 调试工具。
-- `docs/`：发布说明及 GitHub 上传指引。
-- `LICENSE`、`UPSTREAM.md`、`CHANGELOG.md`：许可证、来源及改动记录。
+```text
+upstream/v1.1.0/        正式源码（TypeScript + Vite），改动只改这里
+  src/                  源码：projects / views / store / utils
+  build/                Vite 构建配置
+  scripts/              清单生成与打包（package-extension.mjs）
+  metadata.json         版本、主页、权限、署名
+src/                    1.3.3 构建产物（归档，仅供对照与回滚）
+tools/                  自动化回归测试与独立 Edge 调试工具
+docs/INSTALL.md         Edge / Chrome 详细安装说明
+PATCHES.md              改动清单、源码对应关系、构建步骤
+UPSTREAM.md             来源、署名、同步上游方法
+CHANGELOG.md            版本记录
+```
 
-本地 `edge-automation/`、`recon/`、`backup/`、`dist/` 默认不纳入 Git 跟踪。安装包与对应源码版本应保持一致；不能用版本号相同但内容不同的旧包代替新包。
+本地 `edge-automation/`、`recon/`、`backup/`、`dist/`、`node_modules/` 不纳入 Git 跟踪。发布包与源码版本需一致：同一个版本号不要存在内容不同的两个包。
 
 ## 使用范围
 
